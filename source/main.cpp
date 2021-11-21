@@ -32,27 +32,35 @@ struct Timer
 
 int main()
 {
+    const int NUM_ROUNDS = 10;
+    const int NUM_BENCH_ROUNDS = 10000000;
+    for (auto j = 0; j < NUM_ROUNDS; j++)
     {
-        auto tg = ha::fx_collection::TranceGateImpl::create();
-        ha::fx_collection::AudioFrame in;
-        ha::fx_collection::AudioFrame out;
-
+        std::cout << "Round " << j << std::endl;
         {
-            Timer timer{"C++ : "};
-            for (auto i = 0; i < 100000000; i++)
-                ha::fx_collection::TranceGateImpl::process(tg, in, out);
+            auto tg = ha::fx_collection_rs::TranceGateImpl::tg_create();
+            ha::fx_collection_rs::TranceGateImpl::AudioFrame in;
+            ha::fx_collection_rs::TranceGateImpl::AudioFrame out;
+
+            {
+                Timer timer{"Rust: "};
+                for (auto i = 0; i < NUM_BENCH_ROUNDS; i++)
+                    ha::fx_collection_rs::TranceGateImpl::process(tg, &in, &out);
+            }
         }
-    }
-
-    {
-        auto tg = ha::fx_collection_rs::TranceGateImpl::tg_create();
-        ha::fx_collection_rs::TranceGateImpl::AudioFrame in;
-        ha::fx_collection_rs::TranceGateImpl::AudioFrame out;
 
         {
-            Timer timer{"Rust: "};
-            for (auto i = 0; i < 100000000; i++)
-                ha::fx_collection_rs::TranceGateImpl::process(tg, &in, &out);
+            auto tg = ha::fx_collection::TranceGateImpl::create();
+            ha::fx_collection::AudioFrame in;
+            ha::fx_collection::AudioFrame out;
+
+            {
+                Timer timer{"C++ : "};
+                for (auto i = 0; i < NUM_BENCH_ROUNDS; i++)
+                {
+                    ha::fx_collection::TranceGateImpl::process(tg, in, out);
+                }
+            }
         }
     }
 
