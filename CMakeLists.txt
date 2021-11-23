@@ -12,4 +12,5 @@ target_link_libraries(fx-collection-bench
     PRIVATE
         fx-collection
         fx-collection-rs
+        nanobench
 )

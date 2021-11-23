@@ -6,4 +6,5 @@ endif()
 
 add_subdirectory(corrosion)
 add_subdirectory(fx-collection)
-add_subdirectory(fx-collection-rs)
+add_subdirectory(fx-collection-rs)#
+add_subdirectory(nanobench)
