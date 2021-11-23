@@ -5,6 +5,9 @@
 #include <vector>
 #include "nanobench.h"
 
+// Test to see if Rust and C++ output is equal
+// #define TEST_OUTPUT_EQUALITY 1
+
 int main()
 {
     const int BLOCK_SIZE = 4800000; // 1s of 48kHz audio
@@ -21,6 +24,13 @@ int main()
         frames.emplace_back(dis(gen));
     }
 
+#if TEST_OUTPUT_EQUALITY
+    std::vector<float> rust_out;
+    std::vector<float> cpp_out;
+    rust_out.resize(BLOCK_SIZE);
+    cpp_out.resize(BLOCK_SIZE);
+#endif
+
     auto rust = [&]
     {
         auto tg = ha::fx_collection_rs::TranceGateImpl::tg_create();
@@ -29,8 +39,12 @@ int main()
 
         for (int i = 0; i < BLOCK_SIZE; ++i)
         {
-            in[0] = in[1] = frames[0];
+            in[0] = in[1] = frames[i];
             ha::fx_collection_rs::TranceGateImpl::process(tg, &in, &out);
+
+#if TEST_OUTPUT_EQUALITY
+            rust_out[i] = out[0];
+#endif
         }
     };
 
@@ -42,8 +56,12 @@ int main()
 
         for (int i = 0; i < BLOCK_SIZE; ++i)
         {
-            in.data[0] = in.data[1] = frames[0];
+            in.data[0] = in.data[1] = frames[i];
             ha::fx_collection::TranceGateImpl::process(tg, in, out);
+
+#if TEST_OUTPUT_EQUALITY
+            cpp_out[i] = out.data[0];
+#endif
         }
     };
 
@@ -51,5 +69,10 @@ int main()
         .run("Rust", rust);
     ankerl::nanobench::Bench()
         .run("C++", cpp);
+
+#if TEST_OUTPUT_EQUALITY
+    if (rust_out != cpp_out)
+        std::cout << "Vectors are NOT equal!!!" << std::endl;
+#endif
     return 0;
 }
